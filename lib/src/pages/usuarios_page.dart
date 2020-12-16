@@ -1,7 +1,9 @@
 import 'package:chatapp/src/models/usuario.dart';
+import 'package:chatapp/src/services/auth_service.dart';
 import 'package:chatapp/src/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class UsuariosPage extends StatefulWidget {
@@ -29,11 +31,14 @@ class _UsuariosPageState extends State<UsuariosPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService= Provider.of<AuthService>(context);
+    final usuario=authService.usuario;
     final Responsive size = Responsive.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Text('Mi Nombre',
+          child: Text('${usuario.nombre}',
               style: GoogleFonts.roboto(
                   fontSize: size.iScreen(2.0),
                   color: Colors.black54,
@@ -46,7 +51,13 @@ class _UsuariosPageState extends State<UsuariosPage> {
             Icons.exit_to_app,
             color: Colors.black54,
           ),
-          onPressed: () {},
+          onPressed: () {
+
+            Navigator.pushReplacementNamed(context, 'login');
+            AuthService.deleteToken();
+
+
+          },
         ),
         actions: [
           Container(

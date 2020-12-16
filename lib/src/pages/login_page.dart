@@ -1,11 +1,17 @@
+import 'package:chatapp/src/helpers/mostar_alerta.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:chatapp/src/services/auth_service.dart';
+
+import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:chatapp/src/utils/responsive.dart';
 import 'package:chatapp/src/widgets/boton_login.dart';
 import 'package:chatapp/src/widgets/inputs_principales.dart';
 import 'package:chatapp/src/widgets/labels.dart';
 import 'package:chatapp/src/widgets/logo.dart';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -21,7 +27,9 @@ class LoginPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Logo(titulo: 'Menssenger',),
+                Logo(
+                  titulo: 'Menssenger',
+                ),
                 _Form(),
                 Labels(
                   size: size,
@@ -45,8 +53,6 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-
-
 class _Form extends StatefulWidget {
   @override
   __FormState createState() => __FormState();
@@ -58,6 +64,7 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final autService = Provider.of<AuthService>(context);
     final Responsive size = Responsive.of(context);
     return Container(
       margin: EdgeInsets.only(top: size.iScreen(2.0)),
@@ -88,10 +95,23 @@ class __FormState extends State<_Form> {
             passwordController: passwordController,
             size: size,
             label: 'Ingrear',
-            onPressed: () {
-              print(emailController.text);
-              print(passwordController.text);
-            },
+            onPressed: autService.autenticando
+                ? null
+                : () async{
+                  FocusScope.of(context).unfocus();
+
+
+                final loginOk= await   autService.login(emailController.text.trim(),
+                        passwordController.text.trim());
+                        if(loginOk)
+                        {
+                          Navigator.pushReplacementNamed(context, 'usuarios');
+                        }
+                        else
+                        {
+                          mostarAlerta(context,'Login Incorrecto','Revise sus credenciales nuevamente');
+                        }
+                  },
           )
         ],
       ),

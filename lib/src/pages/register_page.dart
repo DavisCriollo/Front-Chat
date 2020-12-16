@@ -1,3 +1,5 @@
+import 'package:chatapp/src/helpers/mostar_alerta.dart';
+import 'package:chatapp/src/services/auth_service.dart';
 import 'package:chatapp/src/utils/responsive.dart';
 import 'package:chatapp/src/widgets/boton_login.dart';
 import 'package:chatapp/src/widgets/inputs_principales.dart';
@@ -6,6 +8,7 @@ import 'package:chatapp/src/widgets/logo.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -26,11 +29,10 @@ class RegisterPage extends StatelessWidget {
                 ),
                 _Form(),
                 Labels(
-                  size: size,
-                  ruta: 'login',
-                  titulo: '¿Ya tienes cuenta ?',
-                  action:'Ingresa ahora !'
-                ),
+                    size: size,
+                    ruta: 'login',
+                    titulo: '¿Ya tienes cuenta ?',
+                    action: 'Ingresa ahora !'),
                 Text(
                   'Términos y condiciones de uso',
                   style: GoogleFonts.roboto(
@@ -59,6 +61,7 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final autService = Provider.of<AuthService>(context);
     final Responsive size = Responsive.of(context);
     return Container(
       margin: EdgeInsets.only(top: size.iScreen(2.0)),
@@ -77,7 +80,7 @@ class __FormState extends State<_Form> {
             icon: FontAwesomeIcons.envelope,
             placeholder: 'correo@correo.com',
             keyboardType: TextInputType.text,
-            textController: passwordController,
+            textController: emailController,
             isPassword: false,
             autocorrect: false,
           ),
@@ -96,12 +99,26 @@ class __FormState extends State<_Form> {
             emailController: emailController,
             passwordController: passwordController,
             size: size,
-            label: 'Crear',
-            onPressed: () {
-              print(nameController.text);
-              print(emailController.text);
-              print(passwordController.text);
-            },
+            label: 'Crear Cuenta',
+            onPressed: autService.autenticando
+                ? null
+                : () async {
+                    print(nameController.text);
+                    print(emailController.text);
+                    print(passwordController.text);
+                    FocusScope.of(context).unfocus();
+
+                    final registroOk = await autService.register(
+                        nameController.text.trim(),
+                        emailController.text.trim(),
+                        passwordController.text.trim());
+                    if (registroOk==true) {
+                      Navigator.pushReplacementNamed(context, 'usuarios');
+                    } else {
+                      mostarAlerta(context, 'Registro Incorrecto',
+                          registroOk);
+                    }
+                  },
           )
         ],
       ),
